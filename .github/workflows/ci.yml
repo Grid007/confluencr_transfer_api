@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, types, unit tests, drift checks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm test:cov --project unit
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage
+          if-no-files-found: ignore
+      - name: Migrations match the Drizzle schema
+        run: |
+          pnpm db:check
+          pnpm db:generate
+          git diff --exit-code drizzle/ || (echo "schema changed without a migration" && exit 1)
+        env:
+          DATABASE_URL: postgres://ledger:ledger@localhost:5432/ledger
+      - name: OpenAPI document is up to date
+        run: |
+          pnpm openapi:export
+          git diff --exit-code docs/openapi.json || (echo "run pnpm openapi:export and commit" && exit 1)
+
+  database-tests:
+    name: Integration and e2e tests (real PostgreSQL)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Testcontainers uses the runner's Docker daemon.
+      - run: pnpm test:int
+      - run: pnpm test:e2e
+
+  container:
+    name: Image builds and passes the demo
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+      - run: docker compose --profile full up --build -d --wait
+      - run: curl -fsS http://localhost:3000/health
+      - run: node scripts/demo.mjs --base http://localhost:3000
+      - if: failure()
+        run: docker compose --profile full logs
+      - if: always()
+        run: docker compose --profile full down -v

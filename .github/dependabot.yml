@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      # TypeScript 7 (native compiler) is not supported by typescript-eslint or the Nest toolchain yet.
+      - dependency-name: typescript
+        versions: ['>=7.0.0']
+    groups:
+      nest:
+        patterns: ['@nestjs/*']
+      tooling:
+        patterns:
+          [
+            'eslint*',
+            '@eslint/*',
+            'typescript-eslint',
+            'prettier',
+            'husky',
+            'lint-staged',
+            '@commitlint/*',
+          ]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
