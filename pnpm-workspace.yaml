@@ -1,0 +1,9 @@
+engineStrict: true
+allowBuilds:
+  '@scarf/scarf': false
+  '@nestjs/core': true
+  '@swc/core': true
+  esbuild: true
+  cpu-features: false
+  protobufjs: false
+  ssh2: false
