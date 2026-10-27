@@ -4,39 +4,59 @@ A backend API for a simple transaction ledger: create accounts, post credits and
 paginated history, and move money between accounts atomically. Built for the Walnut Folks Group /
 Confluencr Full Stack Developer assessment.
 
-**Stack:** NestJS 12 (TypeScript 6, ESM) · PostgreSQL 17 · Drizzle ORM · Zod 4 · Vitest · Testcontainers ·
-Docker Compose · GitHub Actions.
+**Stack:** NestJS 12 (TypeScript 6, ESM) · PostgreSQL 17 · Drizzle ORM · Zod 4 · Vitest.
 
 ## Run it
 
-**Zero toolchain, just Docker** (starts Postgres, applies migrations, starts the API):
-
-```bash
-docker compose --profile full up --build -d --wait
-curl localhost:3000/health          # {"status":"ok", ...}
-open http://localhost:3000/docs     # Swagger UI
-node scripts/demo.mjs               # replays every worked example from the brief (needs Node 22.22+)
-docker compose --profile full down -v
-```
-
-**Developer loop** (Node 22.22+ or 24 LTS, pnpm 12, Docker):
+The API needs **Node 22.22+ (or 24 LTS), pnpm 12 and a PostgreSQL 13+ database**. Docker is one convenient
+way to get the database; it is not required.
 
 ```bash
 npm install -g pnpm@12.15.0          # pnpm 9/10 refuse this repo's packageManager field, by design
-docker compose up -d db              # Postgres 17 on :5432
 pnpm install
 cp .env.example .env                 # PowerShell: Copy-Item .env.example .env
-pnpm db:migrate
-pnpm start:dev                       # http://localhost:3000/docs
+```
+
+Then pick **one** way to provide the database:
+
+**A. With Docker**
+
+```bash
+docker compose up -d db              # Postgres 17 on :5432, matches .env.example
+```
+
+**B. Without Docker, using any local PostgreSQL**
+
+```bash
+createdb ledger                      # or: psql -c "create database ledger"
+# edit DATABASE_URL in .env, for example: postgres://USER:PASSWORD@localhost:5432/ledger
+```
+
+Then, for either option:
+
+```bash
+pnpm db:migrate                      # creates the tables, constraints and triggers
+pnpm start:dev                       # http://localhost:3000/docs  (Swagger UI)
+node scripts/demo.mjs                # in another terminal: replays the brief's worked examples
+```
+
+Everything in the app and the test suites works with a plain PostgreSQL; nothing depends on Docker.
+
+**Optional, everything in containers** (database, migrations and API; needs only Docker):
+
+```bash
+docker compose --profile full up --build -d --wait
+curl localhost:3000/health
+docker compose --profile full down -v
 ```
 
 ## The 15-minute reviewer path
 
-1. `docker compose --profile full up --build -d --wait`, then `node scripts/demo.mjs`. It prints the brief's
-   examples (0 +100 +50 −30 −20 = 100, debit 150 on 100 rejected, duplicate `reference_id` → 409, transfer
+1. Start the database and API as above, then run `node scripts/demo.mjs`. It prints the brief's examples
+   (0 +100 +50 −30 −20 = 100, debit 150 on 100 rejected, duplicate `reference_id` → 409, transfer
    30 → 70/80) and asserts each one.
 2. Open `/docs` and try the endpoints. Every error response has a named example.
-3. `pnpm test:all` (needs Docker). Read [test/integration/transfers.int-spec.ts](test/integration/transfers.int-spec.ts)
+3. Run the tests (see [Testing](#testing)). Read [test/integration/transfers.int-spec.ts](test/integration/transfers.int-spec.ts)
    and [test/integration/ledger.concurrency.int-spec.ts](test/integration/ledger.concurrency.int-spec.ts) first.
 4. Skim [ASSUMPTIONS.md](ASSUMPTIONS.md) and [docs/adr/](docs/adr), which record what was decided, and what was rejected, and why.
 
@@ -117,8 +137,9 @@ pnpm test:e2e    # the full HTTP stack against real PostgreSQL
 pnpm test:all    # everything; pnpm test:cov for coverage
 ```
 
-Integration and e2e tests start one disposable Postgres container per run (Docker required). No Docker?
-Set `TEST_DATABASE_URL` to any Postgres and it is migrated and used instead. Details, including a log of the
+Integration and e2e tests need a real PostgreSQL. By default they start one disposable container per run
+(Docker). **Without Docker**, point them at any Postgres you can write to and it is migrated and used instead:
+`TEST_DATABASE_URL=postgres://USER:PASSWORD@localhost:5432/ledger_test pnpm test:all`. Details, including a log of the
 bugs found while building, in [docs/TESTING.md](docs/TESTING.md).
 
 ## Project layout
