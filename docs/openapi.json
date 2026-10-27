@@ -1,0 +1,4191 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "checks": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "uptime_s": {
+                      "type": "integer"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "SERVICE_UNAVAILABLE": {
+                    "value": {
+                      "error": {
+                        "status": 503,
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "The database is not reachable",
+                        "context": {
+                          "checks": {
+                            "database": {
+                              "status": "down"
+                            }
+                          }
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Readiness: database reachable and ledger tables accessible",
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/v1/accounts": {
+      "post": {
+        "description": "The balance always starts at 0; clients cannot set it.",
+        "operationId": "AccountsController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "example": "Alice"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "balance": {
+                      "type": "string",
+                      "example": "0.00"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "balance",
+                    "created_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request validation failed / Request body is not valid JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "VALIDATION_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "VALIDATION_ERROR",
+                        "message": "Request validation failed",
+                        "details": [
+                          {
+                            "field": "amount",
+                            "rule": "INVALID_AMOUNT",
+                            "message": "amount must be a positive decimal"
+                          }
+                        ],
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  },
+                  "MALFORMED_JSON": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "MALFORMED_JSON",
+                        "message": "Request body is not valid JSON",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "PAYLOAD_TOO_LARGE": {
+                    "value": {
+                      "error": {
+                        "status": 413,
+                        "code": "PAYLOAD_TOO_LARGE",
+                        "message": "Request body exceeds the 100kb limit",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "UNSUPPORTED_MEDIA_TYPE": {
+                    "value": {
+                      "error": {
+                        "status": 415,
+                        "code": "UNSUPPORTED_MEDIA_TYPE",
+                        "message": "Content-Type must be application/json",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 500,
+                        "code": "INTERNAL_ERROR",
+                        "message": "An unexpected error occurred",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create an account",
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/v1/accounts/{account_id}": {
+      "get": {
+        "operationId": "AccountsController_get_v1",
+        "parameters": [
+          {
+            "name": "account_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Account id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "balance": {
+                      "type": "string",
+                      "example": "0.00"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "balance",
+                    "created_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "VALIDATION_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "VALIDATION_ERROR",
+                        "message": "Request validation failed",
+                        "details": [
+                          {
+                            "field": "amount",
+                            "rule": "INVALID_AMOUNT",
+                            "message": "amount must be a positive decimal"
+                          }
+                        ],
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "ACCOUNT_NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "status": 404,
+                        "code": "ACCOUNT_NOT_FOUND",
+                        "message": "Account 3f2504e0-4f89-41d3-9a0c-0305e82c3301 not found",
+                        "context": {
+                          "account_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 500,
+                        "code": "INTERNAL_ERROR",
+                        "message": "An unexpected error occurred",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get an account",
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/v1/accounts/{account_id}/balance": {
+      "get": {
+        "operationId": "AccountsController_balance_v1",
+        "parameters": [
+          {
+            "name": "account_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Account id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "account_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "balance": {
+                      "type": "string",
+                      "example": "100.00"
+                    }
+                  },
+                  "required": [
+                    "account_id",
+                    "balance"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "VALIDATION_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "VALIDATION_ERROR",
+                        "message": "Request validation failed",
+                        "details": [
+                          {
+                            "field": "amount",
+                            "rule": "INVALID_AMOUNT",
+                            "message": "amount must be a positive decimal"
+                          }
+                        ],
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "ACCOUNT_NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "status": 404,
+                        "code": "ACCOUNT_NOT_FOUND",
+                        "message": "Account 3f2504e0-4f89-41d3-9a0c-0305e82c3301 not found",
+                        "context": {
+                          "account_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 500,
+                        "code": "INTERNAL_ERROR",
+                        "message": "An unexpected error occurred",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get the current balance of an account",
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/v1/accounts/{account_id}/transactions": {
+      "get": {
+        "description": "Filter by `type`; paginate with `page` (default 1) and `limit` (default 20, max 100). Ordered by `created_at` descending with an insertion-sequence tiebreaker.",
+        "operationId": "AccountsController_history_v1",
+        "parameters": [
+          {
+            "name": "account_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Account id"
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "credit",
+                "debit"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "account_id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "credit",
+                              "debit"
+                            ]
+                          },
+                          "amount": {
+                            "type": "string",
+                            "example": "50.00"
+                          },
+                          "description": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "reference_id": {
+                            "type": "string"
+                          },
+                          "balance_after": {
+                            "type": "string",
+                            "description": "Account balance immediately after this transaction"
+                          },
+                          "transfer_id": {
+                            "nullable": true,
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "account_id",
+                          "type",
+                          "amount",
+                          "description",
+                          "reference_id",
+                          "balance_after",
+                          "transfer_id",
+                          "created_at"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "page_size": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "total_records": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "total_pages": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "has_next": {
+                          "type": "boolean"
+                        },
+                        "has_previous": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "page_size",
+                        "total_records",
+                        "total_pages",
+                        "has_next",
+                        "has_previous"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request validation failed / Invalid pagination parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "VALIDATION_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "VALIDATION_ERROR",
+                        "message": "Request validation failed",
+                        "details": [
+                          {
+                            "field": "amount",
+                            "rule": "INVALID_AMOUNT",
+                            "message": "amount must be a positive decimal"
+                          }
+                        ],
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  },
+                  "INVALID_PAGINATION": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "INVALID_PAGINATION",
+                        "message": "Invalid pagination parameters",
+                        "details": [
+                          {
+                            "field": "limit",
+                            "rule": "OUT_OF_RANGE",
+                            "message": "limit must be between 1 and 100"
+                          }
+                        ],
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "ACCOUNT_NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "status": 404,
+                        "code": "ACCOUNT_NOT_FOUND",
+                        "message": "Account 3f2504e0-4f89-41d3-9a0c-0305e82c3301 not found",
+                        "context": {
+                          "account_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 500,
+                        "code": "INTERNAL_ERROR",
+                        "message": "An unexpected error occurred",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Transaction history (newest first)",
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/v1/transactions": {
+      "post": {
+        "description": "Atomically appends an immutable ledger entry and updates the account balance. `reference_id` is unique per account: resubmitting it returns 409 with the existing transaction and changes nothing.",
+        "operationId": "TransactionsController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "account_id": {
+                    "format": "uuid",
+                    "example": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                    "type": "string",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "credit",
+                      "debit"
+                    ]
+                  },
+                  "amount": {
+                    "example": "50.00",
+                    "description": "Decimal, 0.01 to 1000000000000.00, at most 2 decimals",
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "reference_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "example": "inv-1001"
+                  },
+                  "description": {
+                    "example": "Top-up",
+                    "nullable": true,
+                    "type": "string",
+                    "maxLength": 255
+                  }
+                },
+                "required": [
+                  "account_id",
+                  "type",
+                  "amount",
+                  "reference_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "account_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "credit",
+                        "debit"
+                      ]
+                    },
+                    "amount": {
+                      "type": "string",
+                      "example": "50.00"
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "reference_id": {
+                      "type": "string"
+                    },
+                    "balance_after": {
+                      "type": "string",
+                      "description": "Account balance immediately after this transaction"
+                    },
+                    "transfer_id": {
+                      "nullable": true,
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "account_id",
+                    "type",
+                    "amount",
+                    "description",
+                    "reference_id",
+                    "balance_after",
+                    "transfer_id",
+                    "created_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request validation failed / Request body is not valid JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "VALIDATION_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "VALIDATION_ERROR",
+                        "message": "Request validation failed",
+                        "details": [
+                          {
+                            "field": "amount",
+                            "rule": "INVALID_AMOUNT",
+                            "message": "amount must be a positive decimal"
+                          }
+                        ],
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  },
+                  "MALFORMED_JSON": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "MALFORMED_JSON",
+                        "message": "Request body is not valid JSON",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "ACCOUNT_NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "status": 404,
+                        "code": "ACCOUNT_NOT_FOUND",
+                        "message": "Account 3f2504e0-4f89-41d3-9a0c-0305e82c3301 not found",
+                        "context": {
+                          "account_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Transaction already exists / Concurrent update conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "DUPLICATE_TRANSACTION": {
+                    "value": {
+                      "error": {
+                        "status": 409,
+                        "code": "DUPLICATE_TRANSACTION",
+                        "message": "A transaction with reference_id 'inv-1001' already exists for this account",
+                        "context": {
+                          "existing_transaction": {
+                            "id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                            "reference_id": "inv-1001"
+                          }
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  },
+                  "CONCURRENCY_CONFLICT": {
+                    "value": {
+                      "error": {
+                        "status": 409,
+                        "code": "CONCURRENCY_CONFLICT",
+                        "message": "The request conflicted with a concurrent update; retry it",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Insufficient balance / Balance limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "INSUFFICIENT_BALANCE": {
+                    "value": {
+                      "error": {
+                        "status": 422,
+                        "code": "INSUFFICIENT_BALANCE",
+                        "message": "Debit of 150.00 exceeds available balance of 100.00",
+                        "context": {
+                          "account_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                          "balance": "100.00",
+                          "requested_amount": "150.00",
+                          "shortfall": "50.00"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  },
+                  "BALANCE_LIMIT_EXCEEDED": {
+                    "value": {
+                      "error": {
+                        "status": 422,
+                        "code": "BALANCE_LIMIT_EXCEEDED",
+                        "message": "Credit would exceed the maximum representable balance",
+                        "context": {
+                          "account_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 500,
+                        "code": "INTERNAL_ERROR",
+                        "message": "An unexpected error occurred",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Add a credit or debit transaction",
+        "tags": [
+          "Transactions"
+        ]
+      }
+    },
+    "/v1/transactions/{transaction_id}": {
+      "get": {
+        "operationId": "TransactionsController_get_v1",
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "account_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "credit",
+                        "debit"
+                      ]
+                    },
+                    "amount": {
+                      "type": "string",
+                      "example": "50.00"
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "reference_id": {
+                      "type": "string"
+                    },
+                    "balance_after": {
+                      "type": "string",
+                      "description": "Account balance immediately after this transaction"
+                    },
+                    "transfer_id": {
+                      "nullable": true,
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "account_id",
+                    "type",
+                    "amount",
+                    "description",
+                    "reference_id",
+                    "balance_after",
+                    "transfer_id",
+                    "created_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "VALIDATION_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "VALIDATION_ERROR",
+                        "message": "Request validation failed",
+                        "details": [
+                          {
+                            "field": "amount",
+                            "rule": "INVALID_AMOUNT",
+                            "message": "amount must be a positive decimal"
+                          }
+                        ],
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transaction not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "TRANSACTION_NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "status": 404,
+                        "code": "TRANSACTION_NOT_FOUND",
+                        "message": "Transaction 3f2504e0-4f89-41d3-9a0c-0305e82c3301 not found",
+                        "context": {
+                          "transaction_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "METHOD_NOT_ALLOWED": {
+                    "value": {
+                      "error": {
+                        "status": 405,
+                        "code": "METHOD_NOT_ALLOWED",
+                        "message": "DELETE is not supported on this resource; ledger records are immutable",
+                        "context": {
+                          "allowed_methods": [
+                            "GET"
+                          ]
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 500,
+                        "code": "INTERNAL_ERROR",
+                        "message": "An unexpected error occurred",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a transaction",
+        "tags": [
+          "Transactions"
+        ]
+      }
+    },
+    "/v1/transfers": {
+      "post": {
+        "description": "Debits the source and credits the destination in one database transaction. Either both legs are persisted or neither. Legs appear in each account history as ordinary debit/credit rows linked by `transfer_id`. `reference_id` is generated when omitted.",
+        "operationId": "TransfersController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_account_id": {
+                    "format": "uuid",
+                    "example": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                    "type": "string",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+                  },
+                  "destination_account_id": {
+                    "format": "uuid",
+                    "example": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                    "type": "string",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+                  },
+                  "amount": {
+                    "example": "50.00",
+                    "description": "Decimal, 0.01 to 1000000000000.00, at most 2 decimals",
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "reference_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "example": "inv-1001"
+                  },
+                  "description": {
+                    "example": "Top-up",
+                    "nullable": true,
+                    "type": "string",
+                    "maxLength": 255
+                  }
+                },
+                "required": [
+                  "source_account_id",
+                  "destination_account_id",
+                  "amount"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "source_account_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "destination_account_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "amount": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "reference_id": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "debit_transaction": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "account_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "credit",
+                            "debit"
+                          ]
+                        },
+                        "amount": {
+                          "type": "string",
+                          "example": "50.00"
+                        },
+                        "description": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "reference_id": {
+                          "type": "string"
+                        },
+                        "balance_after": {
+                          "type": "string",
+                          "description": "Account balance immediately after this transaction"
+                        },
+                        "transfer_id": {
+                          "nullable": true,
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "account_id",
+                        "type",
+                        "amount",
+                        "description",
+                        "reference_id",
+                        "balance_after",
+                        "transfer_id",
+                        "created_at"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "credit_transaction": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "account_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "credit",
+                            "debit"
+                          ]
+                        },
+                        "amount": {
+                          "type": "string",
+                          "example": "50.00"
+                        },
+                        "description": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "reference_id": {
+                          "type": "string"
+                        },
+                        "balance_after": {
+                          "type": "string",
+                          "description": "Account balance immediately after this transaction"
+                        },
+                        "transfer_id": {
+                          "nullable": true,
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "account_id",
+                        "type",
+                        "amount",
+                        "description",
+                        "reference_id",
+                        "balance_after",
+                        "transfer_id",
+                        "created_at"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "source_account_id",
+                    "destination_account_id",
+                    "amount",
+                    "description",
+                    "reference_id",
+                    "created_at",
+                    "debit_transaction",
+                    "credit_transaction"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request validation failed / Request body is not valid JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "VALIDATION_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "VALIDATION_ERROR",
+                        "message": "Request validation failed",
+                        "details": [
+                          {
+                            "field": "amount",
+                            "rule": "INVALID_AMOUNT",
+                            "message": "amount must be a positive decimal"
+                          }
+                        ],
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  },
+                  "MALFORMED_JSON": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "MALFORMED_JSON",
+                        "message": "Request body is not valid JSON",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "ACCOUNT_NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "status": 404,
+                        "code": "ACCOUNT_NOT_FOUND",
+                        "message": "Account 3f2504e0-4f89-41d3-9a0c-0305e82c3301 not found",
+                        "context": {
+                          "account_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Transfer already exists / Transaction already exists / Concurrent update conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "DUPLICATE_TRANSFER": {
+                    "value": {
+                      "error": {
+                        "status": 409,
+                        "code": "DUPLICATE_TRANSFER",
+                        "message": "A transfer with reference_id 'tr-77' already exists for the source account",
+                        "context": {
+                          "existing_transfer": {
+                            "id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                            "reference_id": "tr-77"
+                          }
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  },
+                  "DUPLICATE_TRANSACTION": {
+                    "value": {
+                      "error": {
+                        "status": 409,
+                        "code": "DUPLICATE_TRANSACTION",
+                        "message": "A transaction with reference_id 'inv-1001' already exists for this account",
+                        "context": {
+                          "existing_transaction": {
+                            "id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                            "reference_id": "inv-1001"
+                          }
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  },
+                  "CONCURRENCY_CONFLICT": {
+                    "value": {
+                      "error": {
+                        "status": 409,
+                        "code": "CONCURRENCY_CONFLICT",
+                        "message": "The request conflicted with a concurrent update; retry it",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Insufficient balance / Balance limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "INSUFFICIENT_BALANCE": {
+                    "value": {
+                      "error": {
+                        "status": 422,
+                        "code": "INSUFFICIENT_BALANCE",
+                        "message": "Debit of 150.00 exceeds available balance of 100.00",
+                        "context": {
+                          "account_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                          "balance": "100.00",
+                          "requested_amount": "150.00",
+                          "shortfall": "50.00"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  },
+                  "BALANCE_LIMIT_EXCEEDED": {
+                    "value": {
+                      "error": {
+                        "status": 422,
+                        "code": "BALANCE_LIMIT_EXCEEDED",
+                        "message": "Credit would exceed the maximum representable balance",
+                        "context": {
+                          "account_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 500,
+                        "code": "INTERNAL_ERROR",
+                        "message": "An unexpected error occurred",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Transfer money between two accounts (atomic)",
+        "tags": [
+          "Transfers"
+        ]
+      }
+    },
+    "/v1/transfers/{transfer_id}": {
+      "get": {
+        "operationId": "TransfersController_get_v1",
+        "parameters": [
+          {
+            "name": "transfer_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "source_account_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "destination_account_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "amount": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "reference_id": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "debit_transaction": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "account_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "credit",
+                            "debit"
+                          ]
+                        },
+                        "amount": {
+                          "type": "string",
+                          "example": "50.00"
+                        },
+                        "description": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "reference_id": {
+                          "type": "string"
+                        },
+                        "balance_after": {
+                          "type": "string",
+                          "description": "Account balance immediately after this transaction"
+                        },
+                        "transfer_id": {
+                          "nullable": true,
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "account_id",
+                        "type",
+                        "amount",
+                        "description",
+                        "reference_id",
+                        "balance_after",
+                        "transfer_id",
+                        "created_at"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "credit_transaction": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "account_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "credit",
+                            "debit"
+                          ]
+                        },
+                        "amount": {
+                          "type": "string",
+                          "example": "50.00"
+                        },
+                        "description": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "reference_id": {
+                          "type": "string"
+                        },
+                        "balance_after": {
+                          "type": "string",
+                          "description": "Account balance immediately after this transaction"
+                        },
+                        "transfer_id": {
+                          "nullable": true,
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "account_id",
+                        "type",
+                        "amount",
+                        "description",
+                        "reference_id",
+                        "balance_after",
+                        "transfer_id",
+                        "created_at"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "source_account_id",
+                    "destination_account_id",
+                    "amount",
+                    "description",
+                    "reference_id",
+                    "created_at",
+                    "debit_transaction",
+                    "credit_transaction"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "VALIDATION_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 400,
+                        "code": "VALIDATION_ERROR",
+                        "message": "Request validation failed",
+                        "details": [
+                          {
+                            "field": "amount",
+                            "rule": "INVALID_AMOUNT",
+                            "message": "amount must be a positive decimal"
+                          }
+                        ],
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transfer not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "TRANSFER_NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "status": 404,
+                        "code": "TRANSFER_NOT_FOUND",
+                        "message": "Transfer 3f2504e0-4f89-41d3-9a0c-0305e82c3301 not found",
+                        "context": {
+                          "transfer_id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301"
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "METHOD_NOT_ALLOWED": {
+                    "value": {
+                      "error": {
+                        "status": 405,
+                        "code": "METHOD_NOT_ALLOWED",
+                        "message": "DELETE is not supported on this resource; ledger records are immutable",
+                        "context": {
+                          "allowed_methods": [
+                            "GET"
+                          ]
+                        },
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "code",
+                        "message",
+                        "request_id",
+                        "timestamp",
+                        "path"
+                      ],
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 422
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "INSUFFICIENT_BALANCE"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "description": "Per-field failures (400 responses)",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "field",
+                              "rule",
+                              "message"
+                            ],
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string",
+                                "example": "INVALID_AMOUNT"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "context": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "status": 500,
+                        "code": "INTERNAL_ERROR",
+                        "message": "An unexpected error occurred",
+                        "request_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                        "timestamp": "2026-10-27T09:12:33.421Z",
+                        "path": "/v1/example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a transfer with both legs",
+        "tags": [
+          "Transfers"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Transaction Ledger API",
+    "description": "Accounts, credit/debit transactions, balances, paginated history and atomic transfers.\n\nMoney is a JSON string with two decimals. Every error uses one envelope: `{ \"error\": { status, code, message, details?, context?, request_id, timestamp, path } }`.\n\nTransactions and transfers are immutable: any verb other than the documented one returns 405 `METHOD_NOT_ALLOWED` with an `Allow` header, and unknown paths return 404 `ROUTE_NOT_FOUND`.",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {}
+  }
+}

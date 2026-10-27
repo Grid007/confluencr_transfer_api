@@ -1,0 +1,146 @@
+### Ready-to-run requests (VS Code "REST Client", JetBrains HTTP Client, or Bruno import).
+### Start the API first. Run requests in order; later ones reuse captured ids.
+
+@base = http://localhost:3000
+
+### --- Create two accounts -------------------------------------------------------------
+# @name alice
+POST {{base}}/v1/accounts
+Content-Type: application/json
+
+{ "name": "Alice" }
+
+###
+# @name bob
+POST {{base}}/v1/accounts
+Content-Type: application/json
+
+{ "name": "Bob" }
+
+###
+@alice = {{alice.response.body.id}}
+@bob = {{bob.response.body.id}}
+
+### --- Credit 100, credit 50, debit 30, debit 20  ->  balance 100 ------------------------
+POST {{base}}/v1/transactions
+Content-Type: application/json
+
+{ "account_id": "{{alice}}", "type": "credit", "amount": 100, "reference_id": "c1", "description": "Opening deposit" }
+
+###
+POST {{base}}/v1/transactions
+Content-Type: application/json
+
+{ "account_id": "{{alice}}", "type": "credit", "amount": "50.00", "reference_id": "c2" }
+
+###
+POST {{base}}/v1/transactions
+Content-Type: application/json
+
+{ "account_id": "{{alice}}", "type": "debit", "amount": 30, "reference_id": "d1" }
+
+###
+POST {{base}}/v1/transactions
+Content-Type: application/json
+
+{ "account_id": "{{alice}}", "type": "debit", "amount": 20, "reference_id": "d2" }
+
+###
+GET {{base}}/v1/accounts/{{alice}}/balance
+
+### --- Errors worth seeing -----------------------------------------------------------------
+### 422 INSUFFICIENT_BALANCE (balance stays 100.00)
+POST {{base}}/v1/transactions
+Content-Type: application/json
+
+{ "account_id": "{{alice}}", "type": "debit", "amount": 150, "reference_id": "d3" }
+
+###
+### 409 DUPLICATE_TRANSACTION (existing transaction returned, nothing created)
+POST {{base}}/v1/transactions
+Content-Type: application/json
+
+{ "account_id": "{{alice}}", "type": "credit", "amount": 50, "reference_id": "c2" }
+
+###
+### 400 VALIDATION_ERROR: client tries to set the balance
+POST {{base}}/v1/accounts
+Content-Type: application/json
+
+{ "name": "Eve", "balance": 500 }
+
+###
+### 400 VALIDATION_ERROR: amount with more than 2 decimals is rejected, never rounded
+POST {{base}}/v1/transactions
+Content-Type: application/json
+
+{ "account_id": "{{alice}}", "type": "credit", "amount": 50.005, "reference_id": "x1" }
+
+###
+### 400 MALFORMED_JSON
+POST {{base}}/v1/accounts
+Content-Type: application/json
+
+{ "name": "A", }
+
+###
+### 404 ACCOUNT_NOT_FOUND
+GET {{base}}/v1/accounts/00000000-0000-4000-8000-000000000000
+
+###
+### 405 METHOD_NOT_ALLOWED: transactions are immutable
+# @name history
+GET {{base}}/v1/accounts/{{alice}}/transactions?limit=1
+
+###
+@txid = {{history.response.body.data[0].id}}
+
+DELETE {{base}}/v1/transactions/{{txid}}
+
+###
+PATCH {{base}}/v1/transactions/{{txid}}
+Content-Type: application/json
+
+{ "amount": 1 }
+
+### --- History: latest first, filter, paginate ------------------------------------------------
+GET {{base}}/v1/accounts/{{alice}}/transactions
+
+###
+GET {{base}}/v1/accounts/{{alice}}/transactions?type=debit&page=1&limit=1
+
+###
+### 400 INVALID_PAGINATION
+GET {{base}}/v1/accounts/{{alice}}/transactions?page=0&limit=101
+
+### --- Transfer 30 from Alice to Bob (Alice 100 -> 70, Bob 0 -> 30) --------------------------
+# @name transfer
+POST {{base}}/v1/transfers
+Content-Type: application/json
+
+{ "source_account_id": "{{alice}}", "destination_account_id": "{{bob}}", "amount": 30, "reference_id": "tr-1" }
+
+###
+GET {{base}}/v1/transfers/{{transfer.response.body.id}}
+
+###
+GET {{base}}/v1/accounts/{{bob}}/balance
+
+###
+### 404 listing every missing account, 400 SAME_ACCOUNT, 409 DUPLICATE_TRANSFER:
+POST {{base}}/v1/transfers
+Content-Type: application/json
+
+{ "source_account_id": "{{alice}}", "destination_account_id": "{{alice}}", "amount": 1 }
+
+###
+POST {{base}}/v1/transfers
+Content-Type: application/json
+
+{ "source_account_id": "{{alice}}", "destination_account_id": "{{bob}}", "amount": 30, "reference_id": "tr-1" }
+
+### --- Operations ---------------------------------------------------------------------------------
+GET {{base}}/health
+
+###
+GET {{base}}/docs-json
