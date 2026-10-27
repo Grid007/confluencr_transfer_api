@@ -56,7 +56,7 @@ export const transactions = pgTable(
       sql`${t.description} is null or char_length(${t.description}) between 1 and 255`,
     ),
   ],
-).enableRLS();
+);
 
 export type TransactionRow = typeof transactions.$inferSelect;
 export type TransactionType = (typeof transactionType.enumValues)[number];

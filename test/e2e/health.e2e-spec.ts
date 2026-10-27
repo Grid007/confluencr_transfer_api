@@ -9,7 +9,7 @@ describe('health', () => {
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
         status: 'ok',
-        checks: { database: { status: 'up' }, ledger_access: { status: 'ok' } },
+        checks: { database: { status: 'up' } },
         version: '1.0.0',
       });
       expect(typeof res.body.checks.database.latency_ms).toBe('number');

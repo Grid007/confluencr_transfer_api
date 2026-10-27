@@ -1,5 +1,5 @@
 {
-  "id": "587999a6-5b77-4bd2-855f-902a8c4f07ea",
+  "id": "fa722e49-2594-4709-8cf1-b6af7e8d59d4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -51,7 +51,7 @@
           "value": "\"accounts\".\"balance\" >= 0"
         }
       },
-      "isRLSEnabled": true
+      "isRLSEnabled": false
     },
     "public.transfers": {
       "name": "transfers",
@@ -160,7 +160,7 @@
           "value": "\"transfers\".\"description\" is null or char_length(\"transfers\".\"description\") between 1 and 255"
         }
       },
-      "isRLSEnabled": true
+      "isRLSEnabled": false
     },
     "public.transactions": {
       "name": "transactions",
@@ -382,7 +382,7 @@
           "value": "\"transactions\".\"description\" is null or char_length(\"transactions\".\"description\") between 1 and 255"
         }
       },
-      "isRLSEnabled": true
+      "isRLSEnabled": false
     }
   },
   "enums": {

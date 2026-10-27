@@ -10,7 +10,7 @@ export class HealthController {
   constructor(private readonly health: HealthService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Readiness: database reachable and ledger tables accessible' })
+  @ApiOperation({ summary: 'Readiness: the database is reachable' })
   @ApiOkResponse({
     schema: {
       type: 'object',

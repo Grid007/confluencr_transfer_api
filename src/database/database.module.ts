@@ -2,7 +2,7 @@ import { Global, Inject, Injectable, Module, type OnApplicationShutdown } from '
 import { ConfigService } from '@nestjs/config';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { type Env, resolvePrepare } from '../config/env.schema.js';
+import type { Env } from '../config/env.schema.js';
 import { DRIZZLE, type Db } from './database.constants.js';
 import * as schema from './schema/index.js';
 
@@ -26,7 +26,6 @@ class DatabaseLifecycle implements OnApplicationShutdown {
         // postgres.js connects lazily, so building the app (e.g. to export OpenAPI) needs no database.
         const client = postgres(url, {
           max: config.get('DB_POOL_MAX', { infer: true }),
-          prepare: resolvePrepare(config.get('DB_PREPARE', { infer: true }), url),
           idle_timeout: 20,
           max_lifetime: 60 * 30,
           connect_timeout: 10,

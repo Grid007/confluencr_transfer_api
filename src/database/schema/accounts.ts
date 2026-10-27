@@ -15,6 +15,6 @@ export const accounts = pgTable(
     check('accounts_name_length', sql`char_length(${t.name}) between 1 and 100`),
     check('accounts_balance_non_negative', sql`${t.balance} >= 0`),
   ],
-).enableRLS();
+);
 
 export type AccountRow = typeof accounts.$inferSelect;

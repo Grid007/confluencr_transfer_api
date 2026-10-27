@@ -14,6 +14,6 @@ export default defineConfig({
   strict: true,
   verbose: true,
   breakpoints: true,
-  dbCredentials: { url: process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? '' },
+  dbCredentials: { url: process.env.DATABASE_URL ?? '' },
   migrations: { table: '__drizzle_migrations', schema: 'drizzle' },
 });

@@ -215,8 +215,7 @@ Same body as at creation. Errors: `400`, `404 TRANSFER_NOT_FOUND`.
 {
   "status": "ok",
   "checks": {
-    "database": { "status": "up", "latency_ms": 3 },
-    "ledger_access": { "status": "ok" }
+    "database": { "status": "up", "latency_ms": 3 }
   },
   "version": "1.0.0",
   "uptime_s": 120,
@@ -224,8 +223,7 @@ Same body as at creation. Errors: `400`, `404 TRANSFER_NOT_FOUND`.
 }
 ```
 
-`503 SERVICE_UNAVAILABLE` (standard envelope, `context.checks`) when the database is unreachable, the schema is
-missing, or the connecting role cannot see the ledger tables.
+`503 SERVICE_UNAVAILABLE` (standard envelope, `context.checks`) when the database is unreachable.
 
 ### Immutability: other methods
 

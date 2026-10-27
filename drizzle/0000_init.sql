@@ -8,7 +8,6 @@ CREATE TABLE "accounts" (
 	CONSTRAINT "accounts_balance_non_negative" CHECK ("accounts"."balance" >= 0)
 );
 --> statement-breakpoint
-ALTER TABLE "accounts" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "transfers" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"source_account_id" uuid NOT NULL,
@@ -24,7 +23,6 @@ CREATE TABLE "transfers" (
 	CONSTRAINT "transfers_description_length" CHECK ("transfers"."description" is null or char_length("transfers"."description") between 1 and 255)
 );
 --> statement-breakpoint
-ALTER TABLE "transfers" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "transactions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"seq" bigint GENERATED ALWAYS AS IDENTITY (sequence name "transactions_seq_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1),
@@ -43,7 +41,6 @@ CREATE TABLE "transactions" (
 	CONSTRAINT "transactions_description_length" CHECK ("transactions"."description" is null or char_length("transactions"."description") between 1 and 255)
 );
 --> statement-breakpoint
-ALTER TABLE "transactions" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "transfers" ADD CONSTRAINT "transfers_source_account_id_accounts_id_fk" FOREIGN KEY ("source_account_id") REFERENCES "public"."accounts"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "transfers" ADD CONSTRAINT "transfers_destination_account_id_accounts_id_fk" FOREIGN KEY ("destination_account_id") REFERENCES "public"."accounts"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_account_id_accounts_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint

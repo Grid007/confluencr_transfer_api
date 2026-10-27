@@ -33,4 +33,4 @@ One database transaction per write, default `READ COMMITTED`. Inside it:
 
 - **SERIALIZABLE + retry:** needs a retry policy, produces spurious failures under contention, harder to reason about.
 - **Optimistic version column:** every conflict becomes a client-visible failure.
-- **Advisory locks:** session-scoped locks do not survive transaction pooling (Supabase port 6543).
+- **Advisory locks:** session-scoped locks would outlive the transaction and are easy to leak.

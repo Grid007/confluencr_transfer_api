@@ -14,7 +14,6 @@ disappears the moment someone runs SQL or a future endpoint is added.
 - `BEFORE UPDATE OR DELETE` row triggers and `BEFORE TRUNCATE` statement triggers on `transactions` and `transfers`
   raise `restrict_violation` (SQLSTATE `23001`). `accounts` rows cannot be deleted, and only `balance` may change.
   A `BEFORE INSERT` trigger enforces the zero initial balance.
-- The triggers use owner-level DDL only, so the identical migration runs on Supabase.
 
 ## Consequences
 
@@ -24,5 +23,5 @@ disappears the moment someone runs SQL or a future endpoint is added.
 ## Rejected
 
 - **API-only immutability:** weaker than the brief's "must remain unchanged".
-- **`REVOKE UPDATE, DELETE`:** depends on roles that differ between Docker, Supabase and managed Postgres.
+- **`REVOKE UPDATE, DELETE`:** depends on database roles, which differ between environments.
 - **404 for forbidden verbs:** misleading, since the resource exists.

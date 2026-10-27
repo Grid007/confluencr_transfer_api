@@ -56,7 +56,7 @@ export class LedgerService {
     private readonly config: ConfigService<Env, true>,
   ) {}
 
-  /** Runs `work` in one database transaction with bounded lock/statement waits (transaction-local, pooler-safe). */
+  /** Runs `work` in one database transaction with bounded lock/statement waits (transaction-local). */
   async run<T>(work: (tx: Tx) => Promise<T>): Promise<T> {
     const lockMs = this.config.get('DB_LOCK_TIMEOUT_MS', { infer: true });
     const statementMs = this.config.get('DB_STATEMENT_TIMEOUT_MS', { infer: true });

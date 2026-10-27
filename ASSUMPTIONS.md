@@ -65,9 +65,8 @@ Rationale for the larger ones is in [docs/adr/](docs/adr).
 37. The API has no authentication or authorisation. It was not requested and is called out as a limitation.
 38. Lock waits are bounded (`DB_LOCK_TIMEOUT_MS`). A stuck lock returns `409 CONCURRENCY_CONFLICT` with `Retry-After` instead of hanging. With ordered locking, deadlocks cannot occur.
 39. Every response carries `X-Request-Id`. A well-formed client-supplied value is echoed; anything else is replaced.
-40. `GET /health` returns `200` when the database answers and the connecting role can see the ledger tables, `503` (in the standard envelope) otherwise.
+40. `GET /health` returns `200` when the database answers, `503` (in the standard envelope) otherwise.
 41. Request bodies above 100 kb are rejected with `413`; non-JSON write bodies with `415`.
 42. Migrations are run explicitly (`pnpm db:migrate`, or the `migrate` service in Compose), never on API start, so several instances cannot race.
-43. The service runs unchanged against Supabase by setting `DATABASE_URL` (session pooler) and, optionally, `DIRECT_URL` for migrations. Tables have row level security enabled with no policies, which hides them from Supabase's public Data API; the service connects as the table owner and is unaffected.
-44. Accounts cannot be updated, closed or deleted through the API.
-45. The assessment brief has no section 6. Nothing is missing.
+43. Accounts cannot be updated, closed or deleted through the API.
+44. The assessment brief has no section 6. Nothing is missing.

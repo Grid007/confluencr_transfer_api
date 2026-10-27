@@ -1,5 +1,5 @@
 -- Ledger immutability, enforced by the database itself (not only by the API).
--- Owner-level DDL only (no superuser, no extensions), so these files run unchanged on Supabase.
+-- Owner-level DDL only (no superuser, no extensions).
 CREATE OR REPLACE FUNCTION public.ledger_reject_mutation() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN

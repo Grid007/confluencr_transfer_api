@@ -33,12 +33,11 @@ async function connect(url: string): Promise<postgres.Sql> {
 /**
  * Applies pending SQL migrations. Run explicitly (never on API boot) so that several API
  * instances cannot race; an advisory lock also serialises concurrent migrators.
- * Uses DIRECT_URL when set (Supabase: session pooler or direct host).
  */
 async function main(): Promise<void> {
-  const url = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
+  const url = process.env.DATABASE_URL;
   if (!url) {
-    console.error('DATABASE_URL (or DIRECT_URL) is required');
+    console.error('DATABASE_URL is required');
     process.exit(1);
   }
   const client = await connect(url);

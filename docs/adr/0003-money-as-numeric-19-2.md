@@ -23,6 +23,6 @@ BigInt minor units and is used for the insufficient-balance comparison and the `
 ## Rejected
 
 - **`BIGINT` minor units:** exact, but adds cents↔units conversion at both edges, BigInt-in-JSON pitfalls, and
-  unreadable values in the Supabase table editor.
+  unreadable values when inspecting the database.
 - **Floats / `Number`:** incorrect for money.
 - **Silently rounding extra decimals:** would move money the caller did not ask to move.

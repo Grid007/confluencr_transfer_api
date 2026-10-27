@@ -5,8 +5,7 @@ paginated history, and move money between accounts atomically. Built for the Wal
 Confluencr Full Stack Developer assessment.
 
 **Stack:** NestJS 12 (TypeScript 6, ESM) · PostgreSQL 17 · Drizzle ORM · Zod 4 · Vitest · Testcontainers ·
-Docker Compose · GitHub Actions. The same code runs against a local Postgres or a Supabase project by
-changing `DATABASE_URL` (see [docs/SUPABASE.md](docs/SUPABASE.md)).
+Docker Compose · GitHub Actions.
 
 ## Run it
 
@@ -106,8 +105,7 @@ balance ± amount` in SQL → insert the immutable row with `balance_after`. No 
   rejected rather than rounded, strings on the wire.
 - **Deterministic history.** `created_at` comes from the database clock at the moment the lock was held, and
   an identity `seq` breaks ties, so "latest first" is the real posting order.
-- **Operations.** Structured JSON logs with a request id, graceful shutdown, a readiness endpoint that also
-  detects a role that cannot see the ledger tables, lock and statement timeouts (a stuck lock becomes a 409,
+- **Operations.** Structured JSON logs with a request id, graceful shutdown, a readiness endpoint, lock and statement timeouts (a stuck lock becomes a 409,
   not a hung request), a non-root multi-stage image with a health check.
 
 ## Testing
@@ -134,23 +132,21 @@ src/
   health/ cli/                         readiness; migrate, reconcile and OpenAPI export commands
 drizzle/                               SQL migrations (generated schema + hand-written integrity triggers)
 test/                                  integration/ and e2e/ suites, shared helpers, Testcontainers setup
-docs/                                  API reference, OpenAPI, testing, Supabase guide, ADRs
+docs/                                  API reference, OpenAPI, testing guide, ADRs
 scripts/                               demo.mjs (worked examples), reconcile.sql
 ```
 
 ## Configuration
 
-| Variable                  | Default | Meaning                                                                               |
-| ------------------------- | ------- | ------------------------------------------------------------------------------------- |
-| `DATABASE_URL`            | —       | Postgres connection string (required)                                                 |
-| `DIRECT_URL`              | —       | Used for migrations if set (Supabase session pooler / direct host)                    |
-| `PORT`                    | `3000`  |                                                                                       |
-| `DB_POOL_MAX`             | `10`    | Connection pool size                                                                  |
-| `DB_PREPARE`              | `auto`  | `auto` turns prepared statements off for PgBouncer/Supavisor transaction mode (:6543) |
-| `DB_LOCK_TIMEOUT_MS`      | `5000`  | Max wait for an account row lock before answering 409                                 |
-| `DB_STATEMENT_TIMEOUT_MS` | `15000` | Statement and idle-in-transaction bound                                               |
-| `LOG_LEVEL`               | `info`  | `fatal` … `trace`, `silent`                                                           |
-| `BODY_LIMIT`              | `100kb` | Request body cap (413 above it)                                                       |
+| Variable                  | Default | Meaning                                               |
+| ------------------------- | ------- | ----------------------------------------------------- |
+| `DATABASE_URL`            | —       | Postgres connection string (required)                 |
+| `PORT`                    | `3000`  |                                                       |
+| `DB_POOL_MAX`             | `10`    | Connection pool size                                  |
+| `DB_LOCK_TIMEOUT_MS`      | `5000`  | Max wait for an account row lock before answering 409 |
+| `DB_STATEMENT_TIMEOUT_MS` | `15000` | Statement and idle-in-transaction bound               |
+| `LOG_LEVEL`               | `info`  | `fatal` … `trace`, `silent`                           |
+| `BODY_LIMIT`              | `100kb` | Request body cap (413 above it)                       |
 
 ## Scripts
 
@@ -162,8 +158,8 @@ scripts/                               demo.mjs (worked examples), reconcile.sql
 - No authentication or authorisation (not requested). Single implicit currency. Accounts cannot be renamed, closed or deleted.
 - Offset pagination can shift if new transactions arrive between page requests (the brief asks for page/limit).
 - No rate limiting or CORS configuration.
-- **Beyond the nominal 3–4 hour scope:** the Testcontainers suites, CI, container image, ADRs and Supabase
-  guide go well past what the brief asks. The core API (accounts, transactions, history, transfers) stands on
+- **Beyond the nominal 3–4 hour scope:** the Testcontainers suites, CI, container image, and ADRs
+  go well past what the brief asks. The core API (accounts, transactions, history, transfers) stands on
   its own; everything else exists to prove it correct and make it easy to review.
 - The brief has no section 6; nothing is missing.
 

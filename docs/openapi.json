@@ -135,7 +135,7 @@
             }
           }
         },
-        "summary": "Readiness: database reachable and ledger tables accessible",
+        "summary": "Readiness: the database is reachable",
         "tags": [
           "Operations"
         ]
