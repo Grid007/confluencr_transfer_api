@@ -35,3 +35,16 @@ $$;
 CREATE TRIGGER accounts_protect BEFORE UPDATE OR DELETE ON public.accounts FOR EACH ROW EXECUTE FUNCTION public.accounts_protect();
 --> statement-breakpoint
 CREATE TRIGGER accounts_no_truncate BEFORE TRUNCATE ON public.accounts FOR EACH STATEMENT EXECUTE FUNCTION public.ledger_reject_mutation();
+--> statement-breakpoint
+-- "Initial balance must always be 0" is a database guarantee too, not only an API validation.
+CREATE OR REPLACE FUNCTION public.accounts_initial_balance() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.balance <> 0 THEN
+    RAISE EXCEPTION 'ledger: accounts must be created with a zero balance' USING ERRCODE = 'restrict_violation';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+--> statement-breakpoint
+CREATE TRIGGER accounts_initial_balance BEFORE INSERT ON public.accounts FOR EACH ROW EXECUTE FUNCTION public.accounts_initial_balance();

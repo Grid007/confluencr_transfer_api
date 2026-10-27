@@ -14,7 +14,9 @@ export const swaggerConfig = () =>
     .setDescription(
       'Accounts, credit/debit transactions, balances, paginated history and atomic transfers.\n\n' +
         'Money is a JSON string with two decimals. Every error uses one envelope: ' +
-        '`{ "error": { status, code, message, details?, context?, request_id, timestamp, path } }`.',
+        '`{ "error": { status, code, message, details?, context?, request_id, timestamp, path } }`.\n\n' +
+        'Transactions and transfers are immutable: any verb other than the documented one returns 405 ' +
+        '`METHOD_NOT_ALLOWED` with an `Allow` header, and unknown paths return 404 `ROUTE_NOT_FOUND`.',
     )
     .setVersion(APP_VERSION)
     .build();

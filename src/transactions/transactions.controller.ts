@@ -62,7 +62,12 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Get a transaction' })
   @ApiParam({ name: 'transaction_id', schema: { type: 'string', format: 'uuid' } })
   @ApiOkResponse({ schema: openApiSchema(transactionResponse) })
-  @ApiErrorResponses('VALIDATION_ERROR', 'TRANSACTION_NOT_FOUND', 'INTERNAL_ERROR')
+  @ApiErrorResponses(
+    'VALIDATION_ERROR',
+    'TRANSACTION_NOT_FOUND',
+    'METHOD_NOT_ALLOWED',
+    'INTERNAL_ERROR',
+  )
   get(@Param({ schema: transactionIdParams }) params: TransactionIdParams) {
     return this.transactions.get(params.transaction_id);
   }

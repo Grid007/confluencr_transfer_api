@@ -64,7 +64,12 @@ export class TransfersController {
   @ApiOperation({ summary: 'Get a transfer with both legs' })
   @ApiParam({ name: 'transfer_id', schema: { type: 'string', format: 'uuid' } })
   @ApiOkResponse({ schema: openApiSchema(transferResponse) })
-  @ApiErrorResponses('VALIDATION_ERROR', 'TRANSFER_NOT_FOUND', 'INTERNAL_ERROR')
+  @ApiErrorResponses(
+    'VALIDATION_ERROR',
+    'TRANSFER_NOT_FOUND',
+    'METHOD_NOT_ALLOWED',
+    'INTERNAL_ERROR',
+  )
   get(@Param({ schema: transferIdParams }) params: TransferIdParams) {
     return this.transfers.get(params.transfer_id);
   }
